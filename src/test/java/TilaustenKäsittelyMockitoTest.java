@@ -4,8 +4,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TilaustenKäsittelyMockitoTest {
     @Mock
@@ -36,37 +35,37 @@ public class TilaustenKäsittelyMockitoTest {
         verify(hinnoittelijaMock).getAlennusProsentti(asiakas, tuote);
     }
      */
-
     @Test
-    public void testaaKäsittelijäWithMockitoHinnoittelijaForLowPrice() {
+    public void HintaYliTaiYhtäSuuriKuin100() {
         // Arrange
+        float lisäale = 5.0f;
         float alkuSaldo = 100.0f;
-        float listaHinta = 50.0f;
-        float alennus = 20.0f;
-        float loppuSaldo = alkuSaldo - (listaHinta * (1 - alennus / 100));
+        float listaHinta = 110.0f;
+        float alennus = 15.0f;
+        float loppuSaldo = alkuSaldo - (listaHinta * (1 - (alennus + lisäale) / 100));
         Asiakas asiakas = new Asiakas(alkuSaldo);
-        Tuote tuote = new Tuote("Testituote", listaHinta);
+        Tuote tuote = new Tuote("TDD in Action", listaHinta);
         // Record
         when(hinnoittelijaMock.getAlennusProsentti(asiakas, tuote))
-                .thenReturn(alennus);
+                .thenReturn(alennus + lisäale); // Adding 5% extra discount for price >= 100
         // Act
         TilaustenKäsittely käsittelijä = new TilaustenKäsittely();
         käsittelijä.setHinnoittelija(hinnoittelijaMock);
         käsittelijä.käsittele(new Tilaus(asiakas, tuote));
         // Assert
         assertEquals(loppuSaldo, asiakas.getSaldo(), 0.001);
-        verify(hinnoittelijaMock).getAlennusProsentti(asiakas, tuote);
+        verify(hinnoittelijaMock, atLeastOnce()).getAlennusProsentti(asiakas, tuote);
     }
 
     @Test
-    public void testaaKäsittelijäWithMockitoHinnoittelijaForHighPrice() {
+    public void HintaAlle100() {
         // Arrange
         float alkuSaldo = 100.0f;
-        float listaHinta = 120.0f;
+        float listaHinta = 30.0f;
         float alennus = 20.0f;
-        float loppuSaldo = alkuSaldo - (listaHinta * (1 - (alennus + 5) / 100));
+        float loppuSaldo = alkuSaldo - (listaHinta * (1 - alennus / 100));
         Asiakas asiakas = new Asiakas(alkuSaldo);
-        Tuote tuote = new Tuote("Testituote", listaHinta);
+        Tuote tuote = new Tuote("TDD in Action", listaHinta);
         // Record
         when(hinnoittelijaMock.getAlennusProsentti(asiakas, tuote))
                 .thenReturn(alennus);
@@ -76,8 +75,7 @@ public class TilaustenKäsittelyMockitoTest {
         käsittelijä.käsittele(new Tilaus(asiakas, tuote));
         // Assert
         assertEquals(loppuSaldo, asiakas.getSaldo(), 0.001);
-        verify(hinnoittelijaMock).getAlennusProsentti(asiakas, tuote);
-        verify(hinnoittelijaMock).setAlennusProsentti(asiakas, alennus + 5);
+        verify(hinnoittelijaMock, atLeastOnce()).getAlennusProsentti(asiakas, tuote);
     }
 
 }

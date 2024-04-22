@@ -23,12 +23,11 @@ public void käsittele(Tilaus tilaus) {
     hinnoittelija.aloita();
     float prosentti = hinnoittelija.getAlennusProsentti(asiakas, tuote);
     if (tuote.getHinta() >= 100) {
-        prosentti += 5;
-        hinnoittelija.setAlennusProsentti(asiakas, prosentti);
+        hinnoittelija.setAlennusProsentti(asiakas, prosentti + 5);
     }
+    prosentti = hinnoittelija.getAlennusProsentti(asiakas, tuote);
     float alennusHinta = tuote.getHinta() * (1 - (prosentti / 100));
     asiakas.setSaldo(asiakas.getSaldo() - alennusHinta);
     hinnoittelija.lopeta();
 }
-
 }
